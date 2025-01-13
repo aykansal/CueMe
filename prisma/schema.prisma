@@ -5,6 +5,7 @@ generator client {
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
 }
 
 model User {
@@ -16,6 +17,16 @@ model User {
   streams       Stream[]        @relation("user")
   // added         Stream[]        @relation("addedBy")
   // role          Role
+  Space         Space[]
+}
+
+model Space {
+  id               String   @id @default(uuid())
+  createdTimestamp DateTime @default(now())
+  name             String
+  Stream           Stream[]
+  ownerId          String
+  owner            User     @relation(fields: [ownerId], references: [id])
 }
 
 model Stream {
@@ -29,13 +40,17 @@ model Stream {
   type             StreamType
   url              String
   extractedId      String
+  voteCount        Int            @default(0)
   upvotes          Upvote[]
-  userId           String
   // addedById        String
   playedTimestamp  DateTime?
   CurrentStream    CurrentStream?
+  userId           String
   user             User           @relation(fields: [userId], references: [id], name: "user")
   // addedBy          User           @relation(fields: [addedById], references: [id], name: "addedBy")
+  spaceId          String?
+  Space            Space?         @relation(fields: [spaceId], references: [id])
+  hasUpvoted       Boolean        @default(false)
 }
 
 model CurrentStream {
