@@ -1,4 +1,5 @@
-import { Video } from "@/app/lib/types";
+import { Stream } from "@/lib/types";
+
 import React, { useEffect, useRef, useState } from "react";
 const YouTubePlayer = ({
   currentVideo,
@@ -7,7 +8,7 @@ const YouTubePlayer = ({
   // @ts-expect-error ignore
   onVideoEnd,
 }: {
-  currentVideo: Video;
+  currentVideo: Stream;
 }) => {
   const playerRef = useRef(null);
   const [isAPIReady, setIsAPIReady] = useState(false);
@@ -78,11 +79,11 @@ const YouTubePlayer = ({
         playerRef.current = null;
       }
     };
-  }, [isAPIReady, currentVideo?.extractedId, playVideo]);
+  }, [isAPIReady, currentVideo?.extractedId, playVideo, onVideoEnd]);
 
   if (!currentVideo) {
     return (
-      <div className="min-h-10 bg-gray-100 flex items-center justify-center rounded">
+      <div className="flex justify-center items-center bg-gray-100 rounded min-h-10">
         <p className="text-gray-500">No video playing</p>
       </div>
     );

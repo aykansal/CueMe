@@ -1,16 +1,17 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import axios from "axios";
 import Image from "next/image";
+import { Play, ChevronUpCircle, ChevronDownCircle } from "lucide-react";
+import { Stream } from "@/lib/types";
+
 import { useToast } from "@/hooks/use-toast";
+import YouTubePlayer from "./YoutubePlayer";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Toaster } from "@/components/ui/toaster";
 import { ShareButton } from "@/components/ShareButton";
-import { Play, ChevronUpCircle, ChevronDownCircle } from "lucide-react";
-import YouTubePlayer from "./YoutubePlayer";
-import { Video } from "@/app/lib/types";
 
 const REFRESH_INTERVAL_MS = 3000;
 
@@ -21,8 +22,8 @@ export default function StreamView({
   creatorId: string;
   playVideo: boolean;
 }) {
-  const [currentVideo, setCurrentVideo] = useState<Video>();
-  const [videoQueue, setVideoQueue] = useState<Video[]>([]);
+  const [currentVideo, setCurrentVideo] = useState<Stream>();
+  const [videoQueue, setVideoQueue] = useState<Stream[]>([]);
   const [newVideoUrl, setNewVideoUrl] = useState("");
   const [previewVideoId, setPreviewVideoId] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -137,7 +138,7 @@ export default function StreamView({
     }
   };
 
-  const refreshStreams = async () => {
+  const refreshStreams = useCallback(async () => {
     try {
       const res = await axios.get(`/api/streams/?creatorId=${creatorId}`);
       const data = await res?.data;
@@ -156,25 +157,25 @@ export default function StreamView({
     } catch (error) {
       console.error("Error refreshing streams:", error);
     }
-  };
+  }, [creatorId]);
 
   useEffect(() => {
     refreshStreams();
     const intervalId = setInterval(refreshStreams, REFRESH_INTERVAL_MS);
     return () => clearInterval(intervalId);
-  }, []);
+  }, [refreshStreams]);
 
   return (
-    <div className="container mx-auto p-4">
+    <div className="mx-auto p-4 container">
       <div className="flex justify-between items-center mb-4">
-        <h1 className="text-2xl font-bold">Song Voting Queue</h1>
+        <h1 className="font-bold text-2xl">Song Voting Queue</h1>
         <ShareButton creatorId={creatorId} />
       </div>
 
       <div className="flex justify-between gap-x-20 mb-8">
         {/* Current Video Player */}
         {/* <div className="basis-1/2">
-          <h2 className="text-xl font-semibold mb-2">Now Playing</h2>
+          <h2 className="mb-2 font-semibold text-xl">Now Playing</h2>
           {currentVideo ? (
             <div className="aspect-video">
               {playVideo ? (
@@ -194,13 +195,13 @@ export default function StreamView({
               )}
             </div>
           ) : (
-            <div className="min-h-10 bg-gray-100 flex items-center justify-center rounded">
+            <div className="flex justify-center items-center bg-gray-100 rounded min-h-10">
               <p className="text-gray-500">No video playing</p>
             </div>
           )}
         </div> */}
         <div className="basis-1/2">
-          <h2 className="text-xl font-semibold mb-2">Now Playing</h2>
+          <h2 className="mb-2 font-semibold text-xl">Now Playing</h2>
           <YouTubePlayer
             //@ts-expect-error ignore
             currentVideo={currentVideo}
@@ -209,8 +210,8 @@ export default function StreamView({
           />
         </div>
         {/* Video Submission */}
-        <div className="basis-1/2 h-full">
-          <h2 className="text-xl font-semibold mb-2">Submit a Song</h2>
+        <div className="h-full basis-1/2">
+          <h2 className="mb-2 font-semibold text-xl">Submit a Song</h2>
           <div className="flex gap-2 mb-2">
             <Input
               type="text"
@@ -228,7 +229,7 @@ export default function StreamView({
             </Button>
           </div>
           {previewVideoId && (
-            <div className="aspect-video max-w-sm">
+            <div className="max-w-sm aspect-video">
               <iframe
                 width="100%"
                 height="100%"
@@ -243,23 +244,23 @@ export default function StreamView({
 
       {/* Video Queue */}
       <div>
-        <div className="flex items-center justify-between mb-3.5">
-          <h2 className="text-xl mb-1 font-semibold">Upcoming Songs</h2>
+        <div className="flex justify-between items-center mb-3.5">
+          <h2 className="mb-1 font-semibold text-xl">Upcoming Songs</h2>
           {videoQueue.length > 0 && playVideo && (
             <Button className="mt4" onClick={playNext}>
-              <Play className="h-4 w-4 mr-2" />
+              <Play className="mr-2 w-4 h-4" />
               Play Next
             </Button>
           )}
         </div>
         {videoQueue.length === 0 ? (
-          <p className="text-gray-500 text-center py-4">No songs in queue</p>
+          <p className="py-4 text-center text-gray-500">No songs in queue</p>
         ) : (
           <ul className="space-y-2">
             {videoQueue.map((video, index) => (
               <li
                 key={video.id}
-                className="flex items-center justify-between bg-gray-100 p-2 rounded"
+                className="flex justify-between items-center bg-gray-100 p-2 rounded"
               >
                 <div className="flex items-center gap-2">
                   <Image
@@ -279,9 +280,9 @@ export default function StreamView({
                 >
                   <span>{video.upvotes}</span>
                   {!video.hasUpvoted ? (
-                    <ChevronUpCircle className="h-4 w-4" />
+                    <ChevronUpCircle className="w-4 h-4" />
                   ) : (
-                    <ChevronDownCircle className="h-4 w-4" />
+                    <ChevronDownCircle className="w-4 h-4" />
                   )}
                 </Button>
               </li>

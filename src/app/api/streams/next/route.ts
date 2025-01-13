@@ -30,6 +30,7 @@ export async function GET() {
             }
         }
     })
+    // console.log(mostUpvotedStream);
     await Promise.all([prismaClient.currentStream.upsert({
         where: {
             userId: user.id,

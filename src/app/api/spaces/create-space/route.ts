@@ -3,8 +3,8 @@ import { getServerSession } from "next-auth";
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 
-const UpvoteSchema = z.object({
-    streamId: z.string()
+const createSpaceSchema = z.object({
+    name: z.string(),
 })
 
 export async function POST(req: NextRequest) {
@@ -22,23 +22,30 @@ export async function POST(req: NextRequest) {
             status: 403
         })
     }
+    // const user= {id:"8a074f1a-8a7c-4582-b6b3-18267b31c757"}
     try {
-        const data = UpvoteSchema.parse(await req.json());
-        await prismaClient.upvote.create({
+        const data = createSpaceSchema.parse(await req.json());
+        const space = await prismaClient.space.create({
             data: {
-                userId: user.id,
-                streamId: data.streamId
+                name: data.name,
+                owner: {
+                    connect: { id: user.id }
+                }
             }
         })
         return NextResponse.json({
-            message: true
+            message: 'Space Created',
+            space
+        },{
+            status: 201
         })
     } catch (error) {
         return NextResponse.json({
             error,
-            message: 'Already Voted'
+            message: 'Error Creating Space'
         }, {
             status: 403
         })
     }
+
 }
