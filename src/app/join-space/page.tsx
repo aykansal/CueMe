@@ -17,8 +17,8 @@ export default function JoinStreamPage() {
       const response = await axios.get("/api/spaces");
       const data = await response.data;
       setSpaces(data);
-    } catch (error: any) {
-      if (error.status === 403) {
+    } catch (error: unknown) {
+      if (axios.isAxiosError(error) && error.response?.status === 403) {
         console.error("unauthenticated");
         return;
       }

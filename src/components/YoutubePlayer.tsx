@@ -1,4 +1,5 @@
 import { Stream } from "@/lib/types";
+import Image from "next/image";
 
 import React, { useEffect, useRef, useState } from "react";
 const YouTubePlayer = ({
@@ -12,7 +13,7 @@ const YouTubePlayer = ({
 }) => {
   const playerRef = useRef(null);
   const [isAPIReady, setIsAPIReady] = useState(false);
-  
+
   useEffect(() => {
     // Only load the API once
     // @ts-expect-error ignore
@@ -20,20 +21,20 @@ const YouTubePlayer = ({
       setIsAPIReady(true);
       return;
     }
-    
+
     // Create a global callback
     // @ts-expect-error ignore
     window.onYouTubeIframeAPIReady = () => {
       setIsAPIReady(true);
     };
-    
+
     // Load the IFrame Player API code asynchronously
     const tag = document.createElement("script");
     tag.src = "https://www.youtube.com/iframe_api";
     const firstScriptTag = document.getElementsByTagName("script")[0];
     // @ts-expect-error ignore
     firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
-    
+
     return () => {
       // @ts-expect-error ignore
       window.onYouTubeIframeAPIReady = null;
@@ -99,7 +100,7 @@ const YouTubePlayer = ({
         />
       ) : (
         <>
-          <img
+          <Image
             src={currentVideo.bigImg}
             alt="thumbnail"
             className="w-full h-full object-cover"

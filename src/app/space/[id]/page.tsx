@@ -19,26 +19,20 @@ import { sortStreams } from "@/lib/utils";
 
 const REFRESH_INTERVAL_MS = 30000;
 
-export default function StreamPage({ params }: { params: { id: string } }) {
+export default function StreamPage({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}) {
   const { toast } = useToast();
+  const spaceId = use(params).id;
+
   const [streamName, setStreamName] = useState<string>("");
   const [currentStream, setCurrentStream] = useState<Stream | null>(null);
   const [streamQueue, setStreamQueue] = useState<Stream[]>([]);
   const [newStreamUrl, setNewStreamUrl] = useState<string>("");
   const [previewStreamId, setPreviewStreamId] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(false);
-
-  // @ts-expect-error ignore type-confict
-  const spaceId = use(params).id;
-
-  useEffect(() => {
-    const spaceName = async () => {
-      await axios.get(`/api/spaces/${spaceId}`).then((response) => {
-        setStreamName(`You're listening ${response.data.name}`);
-      });
-    };
-    spaceName();
-  }, [spaceId]);
 
   const extractStreamId = (url: string) => {
     const regex =
@@ -144,7 +138,14 @@ export default function StreamPage({ params }: { params: { id: string } }) {
     return () => clearInterval(intervalId);
   }, [refreshStreams]);
 
-  console.log(streamQueue);
+  useEffect(() => {
+    const spaceName = async () => {
+      await axios.get(`/api/spaces/${spaceId}`).then((response) => {
+        setStreamName(`You're listening ${response.data.name}`);
+      });
+    };
+    spaceName();
+  }, [spaceId]);
 
   return (
     <div className="mx-auto p-4 min-h-[80vh] container">

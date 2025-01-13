@@ -18,7 +18,6 @@ export async function GET() {
             status: 403
         })
     }
-
     const mostUpvotedStream = await prismaClient.stream.findFirst({
         where: {
             userId: user.id,
@@ -30,7 +29,6 @@ export async function GET() {
             }
         }
     })
-    // console.log(mostUpvotedStream);
     await Promise.all([prismaClient.currentStream.upsert({
         where: {
             userId: user.id,

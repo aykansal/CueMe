@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Share2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
-export function ShareButton({ spaceId }: { spaceId: string }) {
+export function ShareButton({ }: { spaceId: string }) {
   const { toast } = useToast();
   const [isSharing, setIsSharing] = useState(false);
 
